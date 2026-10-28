@@ -2,7 +2,7 @@ r"""Reader for Crazy Taxi 3 (PC) texture banks (Media\bankNN.art).
 
   u32 count, u32 offset[count]
   per texture: "GXTX" u16 width u16 height u32 data_size u16 1 u16 pixel_format
-               data_size bytes of 16-bit pixels, row-major, no mipmaps.
+               data_size bytes of 8- or 16-bit pixels, Xbox-swizzled, no mipmaps.
 """
 import os
 import struct
@@ -14,8 +14,11 @@ from PIL import Image
 FORMATS = {
     0: "ARGB1555",
     1: "ARGB4444",
+    3: "I8",    # 8-bit intensity (light flares, grilles); used as both colour and alpha
+    4: "A8L8",  # alpha in the high byte; seen with luminance 0 (shadow)
     5: "RGB565",
 }
+BYTES_PER_PIXEL = {"I8": 1}
 
 
 def _expand(v, bits):
@@ -29,6 +32,10 @@ def decode_pixel(p, fmt):
         return (_expand(p >> 10 & 31, 5), _expand(p >> 5 & 31, 5), _expand(p & 31, 5), 255 if p & 0x8000 else 0)
     if fmt == "ARGB4444":
         return (_expand(p >> 8 & 15, 4), _expand(p >> 4 & 15, 4), _expand(p & 15, 4), _expand(p >> 12 & 15, 4))
+    if fmt == "I8":
+        return (p, p, p, p)
+    if fmt == "A8L8":
+        return (p & 255, p & 255, p & 255, p >> 8)
     raise ValueError(fmt)
 
 
@@ -67,7 +74,7 @@ def swizzle_index(x, y, w, h):
 
 def to_image(w, h, code, data, fmt=None, swizzled=True):
     fmt = fmt or FORMATS.get(code, "RGB565")
-    px = struct.unpack_from("<%dH" % (w * h), data)
+    px = struct.unpack_from("<%d%s" % (w * h, "B" if BYTES_PER_PIXEL.get(fmt, 2) == 1 else "H"), data)
     if swizzled:
         px = [px[swizzle_index(x, y, w, h)] for y in range(h) for x in range(w)]
     img = Image.new("RGBA", (w, h))

@@ -227,11 +227,11 @@ LIGHT_PUSH = 0.02  # m: sit the flare just outside the lens, not inside it
 
 def find_lamps(parts):
     """Lamp centres (NFS metres) from CT3's lamp-lens meshes: {"head"|"brake": {+1|-1: [pos, ...]}}.
-    CT3 keeps the lenses in the "brakelight" object: the rear lens mesh has three round lamps per side,
+    CT3 keeps the lenses in the "lights" object: the rear lens mesh has three round lamps per side,
     all used as brake lights, and the front one two round headlights per side. Each lamp is its own
     connected piece of mesh (the two headlights nearly touch, so position gaps can't split them)."""
     lamps = {}
-    for g in parts["brakelight"]:
+    for g in parts["lights"]:
         if not is_alpha(g["flags"]):
             continue  # the chrome housings
         rear = sum(p[2] for p in g["pos"]) < 0
@@ -803,7 +803,7 @@ def main(export_json, stock_dir, out_dir, mode=""):
         grp = group_for(body, "sign:" + name, name, SHADER_SIGN, "BODY_MISC", tpl_opaque, 0xFFFFFFFF)
         grp.add([ct_to_nfs(p) for p in g["pos"]], [ct_nrm_to_nfs(n) for n in g["nrm"]], uv, g["tris"])
 
-    for part in ("body", "brakelight"):
+    for part in ("body", "lights"):
         for g in meta["parts"][part]:
             pos = [ct_to_nfs(p) for p in g["pos"]]
             nrm = [ct_nrm_to_nfs(n) for n in g["nrm"]]
