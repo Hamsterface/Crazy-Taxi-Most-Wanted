@@ -1,0 +1,18 @@
+# Game installs. Nothing taken from the games is committed.
+/Crazy Taxi 3/
+/NFS Most Wanted/
+
+# Build output and scratch work. build/env.sh (toolchain setup) is the only tracked file in build/.
+# build/gear_display/*.png are Crazy Taxi's gear display textures: supply your own copies (see build.sh).
+/build/*
+!/build/env.sh
+/dist/
+
+# Python
+__pycache__/
+*.pyc
+
+# Personal
+/chat logs/
+/.claude/settings.local.json
+/.vscode/

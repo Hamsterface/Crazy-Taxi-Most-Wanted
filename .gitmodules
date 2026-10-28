@@ -1,0 +1,3 @@
+[submodule "extern/mwsdk"]
+	path = extern/mwsdk
+	url = https://github.com/tsyvm/mwsdk
